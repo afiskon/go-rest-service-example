@@ -96,7 +96,7 @@ func Insert(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := make(map[string]string, 10)
+	resp := make(map[string]string, 1)
 	resp["id"] = strconv.FormatUint(id, 10)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	err = json.NewEncoder(w).Encode(resp)
