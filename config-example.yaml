@@ -1,0 +1,4 @@
+loglevel: debug
+listen: 0.0.0.0:8080
+db:
+  url: postgres://restservice:s3cr3t@localhost/restservice?sslmode=disable&pool_max_conns=10

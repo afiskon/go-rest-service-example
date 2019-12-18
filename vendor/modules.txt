@@ -1,0 +1,87 @@
+# github.com/fsnotify/fsnotify v1.4.7
+github.com/fsnotify/fsnotify
+# github.com/gorilla/mux v1.7.3
+github.com/gorilla/mux
+# github.com/hashicorp/hcl v1.0.0
+github.com/hashicorp/hcl
+github.com/hashicorp/hcl/hcl/printer
+github.com/hashicorp/hcl/hcl/ast
+github.com/hashicorp/hcl/hcl/parser
+github.com/hashicorp/hcl/hcl/token
+github.com/hashicorp/hcl/json/parser
+github.com/hashicorp/hcl/hcl/scanner
+github.com/hashicorp/hcl/hcl/strconv
+github.com/hashicorp/hcl/json/scanner
+github.com/hashicorp/hcl/json/token
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
+# github.com/jackc/chunkreader/v2 v2.0.0
+github.com/jackc/chunkreader/v2
+# github.com/jackc/pgconn v1.1.0
+github.com/jackc/pgconn
+github.com/jackc/pgconn/stmtcache
+github.com/jackc/pgconn/internal/ctxwatch
+# github.com/jackc/pgio v1.0.0
+github.com/jackc/pgio
+# github.com/jackc/pgpassfile v1.0.0
+github.com/jackc/pgpassfile
+# github.com/jackc/pgproto3/v2 v2.0.0
+github.com/jackc/pgproto3/v2
+# github.com/jackc/pgtype v1.0.2
+github.com/jackc/pgtype
+# github.com/jackc/pgx/v4 v4.1.2
+github.com/jackc/pgx/v4
+github.com/jackc/pgx/v4/pgxpool
+github.com/jackc/pgx/v4/internal/sanitize
+# github.com/jackc/puddle v1.0.0
+github.com/jackc/puddle
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
+github.com/konsorten/go-windows-terminal-sequences
+# github.com/magiconair/properties v1.8.1
+github.com/magiconair/properties
+# github.com/mitchellh/mapstructure v1.1.2
+github.com/mitchellh/mapstructure
+# github.com/pelletier/go-toml v1.2.0
+github.com/pelletier/go-toml
+# github.com/pkg/errors v0.8.1
+github.com/pkg/errors
+# github.com/sirupsen/logrus v1.4.2
+github.com/sirupsen/logrus
+# github.com/spf13/afero v1.1.2
+github.com/spf13/afero
+github.com/spf13/afero/mem
+# github.com/spf13/cast v1.3.0
+github.com/spf13/cast
+# github.com/spf13/cobra v0.0.5
+github.com/spf13/cobra
+# github.com/spf13/jwalterweatherman v1.0.0
+github.com/spf13/jwalterweatherman
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# github.com/spf13/viper v1.5.0
+github.com/spf13/viper
+# github.com/subosito/gotenv v1.2.0
+github.com/subosito/gotenv
+# golang.org/x/crypto v0.0.0-20190911031432-227b76d455e7
+golang.org/x/crypto/pbkdf2
+# golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456
+golang.org/x/sys/unix
+# golang.org/x/text v0.3.2
+golang.org/x/text/secure/precis
+golang.org/x/text/transform
+golang.org/x/text/unicode/norm
+golang.org/x/text/cases
+golang.org/x/text/language
+golang.org/x/text/runes
+golang.org/x/text/secure/bidirule
+golang.org/x/text/width
+golang.org/x/text/internal
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
+golang.org/x/text/unicode/bidi
+golang.org/x/text/internal/tag
+# golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
+golang.org/x/xerrors
+golang.org/x/xerrors/internal
+# gopkg.in/yaml.v2 v2.2.4
+gopkg.in/yaml.v2
