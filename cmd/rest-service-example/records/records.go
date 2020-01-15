@@ -21,9 +21,9 @@ func SelectAll(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	h := w.Header()
 	h.Set("Content-Type", "text/html")
 	w.WriteHeader(200)
-	_, err := w.Write([]byte("<h1>records.SelectAll: under construction</h1>\n"))
+	_, err := w.Write([]byte("<h1>records.SelectAll: under construction</h1>"))
 	if err != nil {
-		log.Errorf("PostHandler, w.Write: %v\n", err)
+		log.Errorf("PostHandler, w.Write: %v", err)
 	}
 }
 
@@ -55,7 +55,7 @@ func Select(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Errorf("Unable to SELECT: %v\n", err)
+		log.Errorf("Unable to SELECT: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -63,7 +63,7 @@ func Select(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	err = json.NewEncoder(w).Encode(rec)
 	if err != nil {
-		log.Errorf("Unable to encode json: %v\n", err)
+		log.Errorf("Unable to encode json: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -79,7 +79,7 @@ func Insert(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 
 	conn, err := p.Acquire(context.Background())
 	if err != nil {
-		log.Errorf("Unable to acquire a database connection: %v\n", err)
+		log.Errorf("Unable to acquire a database connection: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -91,7 +91,7 @@ func Insert(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	var id uint64
 	err = row.Scan(&id)
 	if err != nil {
-		log.Errorf("Unable to INSERT: %v\n", err)
+		log.Errorf("Unable to INSERT: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -101,7 +101,7 @@ func Insert(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	err = json.NewEncoder(w).Encode(resp)
 	if err != nil {
-		log.Errorf("Unable to encode json: %v\n", err)
+		log.Errorf("Unable to encode json: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -124,7 +124,7 @@ func Update(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 
 	conn, err := p.Acquire(context.Background())
 	if err != nil {
-		log.Errorf("Unable to acquire a database connection: %v\n", err)
+		log.Errorf("Unable to acquire a database connection: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -157,7 +157,7 @@ func Delete(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 
 	conn, err := p.Acquire(context.Background())
 	if err != nil {
-		log.Errorf("Unable to acquire a database connection: %v\n", err)
+		log.Errorf("Unable to acquire a database connection: %v", err)
 		w.WriteHeader(500)
 		return
 	}
@@ -165,7 +165,7 @@ func Delete(p *pgxpool.Pool, w http.ResponseWriter, r *http.Request) {
 
 	ct, err := conn.Exec(context.Background(), "DELETE FROM phonebook WHERE id = $1", id)
 	if err != nil {
-		log.Errorf("Unable to DELETE: %v\n", err)
+		log.Errorf("Unable to DELETE: %v", err)
 		w.WriteHeader(500)
 		return
 	}

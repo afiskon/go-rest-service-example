@@ -38,25 +38,25 @@ func initViper(configPath string) {
 func migrateDatabase(conn *pgx.Conn) {
 	migrator, err := migrate.NewMigrator(conn, "schema_version")
 	if err != nil {
-		log.Fatalf("Unable to create a migrator: %v\n", err)
+		log.Fatalf("Unable to create a migrator: %v", err)
 	}
 
 	err = migrator.LoadMigrations("./migrations")
 	if err != nil {
-		log.Fatalf("Unable to load migrations: %v\n", err)
+		log.Fatalf("Unable to load migrations: %v", err)
 	}
 
 	err = migrator.Migrate()
 	if err != nil {
-		log.Fatalf("Unable to migrate: %v\n", err)
+		log.Fatalf("Unable to migrate: %v", err)
 	}
 
 	ver, err := migrator.GetCurrentVersion()
 	if err != nil {
-		log.Fatalf("Unable to get current schema version: %v\n", err)
+		log.Fatalf("Unable to get current schema version: %v", err)
 	}
 
-	log.Infof("Migration done. Current schema version: %v\n", ver)
+	log.Infof("Migration done. Current schema version: %v", ver)
 }
 
 func initHandlers(pool *pgxpool.Pool) http.Handler {
@@ -109,14 +109,14 @@ func run(configPath string) {
 
 	pool, err := pgxpool.Connect(context.Background(), dbURL)
 	if err != nil {
-		log.Fatalf("Unable to connection to database: %v\n", err)
+		log.Fatalf("Unable to connection to database: %v", err)
 	}
 	defer pool.Close()
 	log.Infof("Connected!")
 
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
-		log.Fatalf("Unable to acquire a database connection: %v\n", err)
+		log.Fatalf("Unable to acquire a database connection: %v", err)
 	}
 	migrateDatabase(conn.Conn())
 	conn.Release()
@@ -126,10 +126,10 @@ func run(configPath string) {
 	http.Handle("/", initHandlers(pool))
 	err = http.ListenAndServe(listenAddr, nil)
 	if err != nil {
-		log.Fatalf("http.ListenAndServe: %v\n", err)
+		log.Fatalf("http.ListenAndServe: %v", err)
 	}
 
-	log.Info("HTTP server terminated\n")
+	log.Info("HTTP server terminated")
 }
 
 func main() {
