@@ -153,7 +153,7 @@ func TestMain(m *testing.M) {
 	confPath, stopPostgreSQL := StartPostgreSQL()
 	log.Infoln("[TestMain] PostgreSQL started!")
 
-	// We should change directory, otherwise the serive will not find `migrations` directory
+	// We should change directory, otherwise the service will not find `migrations` directory
 	err := os.Chdir("../..")
 	if err != nil {
 		stopPostgreSQL()
