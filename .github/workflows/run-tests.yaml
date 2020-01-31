@@ -5,8 +5,8 @@ on: [push]
 env:
   GO_VERSION: 1.12.15
 jobs:
-  build:
-    name: Build
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
     - name: set up go ${{env.GO_VERSION}}
@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: ./build.sh
     - name: Test
-      run: go test ./...
+      run: go test -v ./...
