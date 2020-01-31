@@ -7,8 +7,8 @@ env:
 jobs:
   test:
     name: Run Tests
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    # runs-on: self-hosted
     steps:
     - name: set up go ${{env.GO_VERSION}}
       uses: actions/setup-go@v1
