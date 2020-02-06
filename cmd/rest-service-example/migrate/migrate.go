@@ -250,7 +250,6 @@ func (m *Migrator) MigrateTo(targetVersion int32, onCommitFailed func(err error)
 		txOpts := pgx.TxOptions{
 			IsoLevel:       pgx.Serializable,
 			AccessMode:     pgx.ReadWrite,
-			DeferrableMode: pgx.NotDeferrable,
 		}
 		tx, err := m.conn.BeginTx(context.Background(), txOpts)
 		if err != nil {
