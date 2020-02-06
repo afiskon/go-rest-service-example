@@ -47,33 +47,16 @@ func (client *httpClient) sendJsonReq(method, url string, reqBody []byte) (resp 
 	return resp, resBody, nil
 }
 
-func StartPostgreSQL() (confPath string, cleaner func()) {
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Panicf("[StartPostgreSQL] dockertest.NewPool failed: %v", err)
-	}
-
-	resource, err := pool.Run(
-		"postgres", "11",
-		[]string{
-			"POSTGRES_DB=restservice",
-			"POSTGRES_PASSWORD=s3cr3t",
-		},
-	)
-	if err != nil {
-		log.Panicf("[StartPostgreSQL] pool.Run failed: %v", err)
-	}
-
-	// PostgreSQL needs some time to start.
+func waitForDBMSAndCreateConfig(pool *dockertest.Pool, resource *dockertest.Resource, connString string) (confPath string, cleaner func()) {
+	// DBMS needs some time to start.
 	// Port forwarding always works, thus net.Dial can't be used here.
-	connString := "postgres://postgres:s3cr3t@"+resource.GetHostPort("5432/tcp")+"/restservice?sslmode=disable"
 	attempt := 0
 	ok := false
 	for attempt < 20 {
 		attempt++
 		conn, err := pgx.Connect(context.Background(), connString)
 		if err != nil {
-			log.Infof("[StartPostgreSQL] pgx.Connect failed: %v, waiting... (attempt %d)", err, attempt)
+			log.Infof("[waitForDBMSAndCreateConfig] pgx.Connect failed: %v, waiting... (attempt %d)", err, attempt)
 			time.Sleep(1 * time.Second)
 			continue
 		}
@@ -85,7 +68,7 @@ func StartPostgreSQL() (confPath string, cleaner func()) {
 
 	if !ok {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] couldn't connect to PostgreSQL")
+		log.Panicf("[waitForDBMSAndCreateConfig] couldn't connect to PostgreSQL")
 	}
 
 	tmpl, err := template.New("config").Parse(`
@@ -96,7 +79,7 @@ db:
 `)
 	if err != nil {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] template.Parse failed: %v", err)
+		log.Panicf("[waitForDBMSAndCreateConfig] template.Parse failed: %v", err)
 	}
 
 	configArgs := struct {
@@ -108,49 +91,70 @@ db:
 	err = tmpl.Execute(&configBuff, configArgs)
 	if err != nil {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] tmpl.Execute failed: %v", err)
+		log.Panicf("[waitForDBMSAndCreateConfig] tmpl.Execute failed: %v", err)
 	}
 
 	confFile, err := ioutil.TempFile("", "config.*.yaml")
 	if err != nil {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] ioutil.TempFile failed: %v", err)
+		log.Panicf("[waitForDBMSAndCreateConfig] ioutil.TempFile failed: %v", err)
 	}
 
-	log.Infof("[StartPostgreSQL] confFile.Name = %s", confFile.Name())
+	log.Infof("[waitForDBMSAndCreateConfig] confFile.Name = %s", confFile.Name())
 
 	_, err = confFile.WriteString(configBuff.String())
 	if err != nil {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] confFile.WriteString failed: %v", err)
+		log.Panicf("[waitForDBMSAndCreateConfig] confFile.WriteString failed: %v", err)
 	}
 
 	err = confFile.Close()
 	if err != nil {
 		_ = pool.Purge(resource)
-		log.Panicf("[StartPostgreSQL] confFile.Close failed: %v", err)
+		log.Panicf("[waitForDBMSAndCreateConfig] confFile.Close failed: %v", err)
 	}
 
 	cleanerFunc := func() {
 		// purge the container
 		err := pool.Purge(resource)
 		if err != nil {
-			log.Panicf("[StartPostgreSQL] pool.Purge failed: %v", err)
+			log.Panicf("[waitForDBMSAndCreateConfig] pool.Purge failed: %v", err)
 		}
 
 		err = os.Remove(confFile.Name())
 		if err != nil {
-			log.Panicf("[StartPostgreSQL] os.Remove failed: %v", err)
+			log.Panicf("[waitForDBMSAndCreateConfig] os.Remove failed: %v", err)
 		}
 	}
 
 	return confFile.Name(), cleanerFunc
 }
 
-func StartCockroachDB() (confPath string, cleaner func()) {
+func startPostgreSQL() (confPath string, cleaner func()) {
 	pool, err := dockertest.NewPool("")
 	if err != nil {
-		log.Panicf("[StartCockroachDB] dockertest.NewPool failed: %v", err)
+		log.Panicf("[startPostgreSQL] dockertest.NewPool failed: %v", err)
+	}
+
+	resource, err := pool.Run(
+		"postgres", "11",
+		[]string{
+			"POSTGRES_DB=restservice",
+			"POSTGRES_PASSWORD=this_is_postgres",
+		},
+	)
+	if err != nil {
+		log.Panicf("[startPostgreSQL] pool.Run failed: %v", err)
+	}
+
+	connString := "postgres://postgres:this_is_postgres@"+resource.GetHostPort("5432/tcp")+"/restservice?sslmode=disable"
+	return waitForDBMSAndCreateConfig(pool, resource, connString)
+}
+
+func startCockroachDB() (confPath string, cleaner func()) {
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		log.Panicf("[startCockroachDB] dockertest.NewPool failed: %v", err)
 	}
 
 	opts := &dockertest.RunOptions{
@@ -161,90 +165,11 @@ func StartCockroachDB() (confPath string, cleaner func()) {
 	resource, err := pool.RunWithOptions(opts)
 
 	if err != nil {
-		log.Panicf("[StartCockroachDB] pool.Run failed: %v", err)
+		log.Panicf("[startCockroachDB] pool.Run failed: %v", err)
 	}
 
-	// CockroachDB needs some time to start.
-	// Port forwarding always works, thus net.Dial can't be used here.
 	connString := "postgres://root@"+resource.GetHostPort("26257/tcp")+"/postgres?sslmode=disable"
-	attempt := 0
-	ok := false
-	for attempt < 20 {
-		attempt++
-		conn, err := pgx.Connect(context.Background(), connString)
-		if err != nil {
-			log.Infof("[StartCockroachDB] pgx.Connect failed: %v, waiting... (attempt %d)", err, attempt)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		_ = conn.Close(context.Background())
-		ok = true
-		break
-	}
-
-	if !ok {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] couldn't connect to CockroachDB")
-	}
-
-	tmpl, err := template.New("config").Parse(`
-loglevel: debug
-listen: 0.0.0.0:8080
-db:
-  url: {{.ConnString}}
-`)
-	if err != nil {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] template.Parse failed: %v", err)
-	}
-
-	configArgs := struct {
-		ConnString string
-	} {
-		ConnString: connString,
-	}
-	var configBuff bytes.Buffer
-	err = tmpl.Execute(&configBuff, configArgs)
-	if err != nil {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] tmpl.Execute failed: %v", err)
-	}
-
-	confFile, err := ioutil.TempFile("", "config.*.yaml")
-	if err != nil {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] ioutil.TempFile failed: %v", err)
-	}
-
-	log.Infof("[StartCockroachDB] confFile.Name = %s", confFile.Name())
-
-	_, err = confFile.WriteString(configBuff.String())
-	if err != nil {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] confFile.WriteString failed: %v", err)
-	}
-
-	err = confFile.Close()
-	if err != nil {
-		_ = pool.Purge(resource)
-		log.Panicf("[StartCockroachDB] confFile.Close failed: %v", err)
-	}
-
-	cleanerFunc := func() {
-		// purge the container
-		err := pool.Purge(resource)
-		if err != nil {
-			log.Panicf("[StartCockroachDB] pool.Purge failed: %v", err)
-		}
-
-		err = os.Remove(confFile.Name())
-		if err != nil {
-			log.Panicf("[StartCockroachDB] os.Remove failed: %v", err)
-		}
-	}
-
-	return confFile.Name(), cleanerFunc
+	return waitForDBMSAndCreateConfig(pool, resource, connString)
 }
 
 // TestMain does the before and after setup
@@ -254,11 +179,11 @@ func TestMain(m *testing.M) {
 	var stopDB func()
 	if len(useCockroachEnv) > 0 {
 		log.Infoln("[TestMain] About to start CockroachDB...")
-		confPath, stopDB = StartCockroachDB()
+		confPath, stopDB = startCockroachDB()
 		log.Infoln("[TestMain] CockroachDB started!")
 	} else {
 		log.Infoln("[TestMain] About to start PostgreSQL...")
-		confPath, stopDB = StartPostgreSQL()
+		confPath, stopDB = startPostgreSQL()
 		log.Infoln("[TestMain] PostgreSQL started!")
 	}
 
