@@ -88,7 +88,7 @@ func initHandlers(pool *pgxpool.Pool) http.Handler {
 	return r
 }
 
-func run(configPath string) {
+func run(configPath string, skipMigration bool) {
 	customFormatter := new(log.TextFormatter)
 	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
 	customFormatter.FullTimestamp = true
@@ -114,12 +114,14 @@ func run(configPath string) {
 	defer pool.Close()
 	log.Infof("Connected!")
 
-	conn, err := pool.Acquire(context.Background())
-	if err != nil {
-		log.Fatalf("Unable to acquire a database connection: %v", err)
+	if !skipMigration {
+		conn, err := pool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Unable to acquire a database connection: %v", err)
+		}
+		migrateDatabase(conn.Conn())
+		conn.Release()
 	}
-	migrateDatabase(conn.Conn())
-	conn.Release()
 
 	listenAddr := viper.GetString("listen")
 	log.Infof("Starting HTTP server at %s...", listenAddr)
@@ -134,16 +136,18 @@ func run(configPath string) {
 
 func main() {
 	var configPath string
+	var skipMigration bool
 
 	rootCmd := cobra.Command{
 		Use:     "rest-service-example",
 		Version: "v1.0",
 		Run: func(cmd *cobra.Command, args []string) {
-			run(configPath)
+			run(configPath, skipMigration)
 		},
 	}
 
 	rootCmd.Flags().StringVarP(&configPath, "config", "c", "", "Config file path")
+	rootCmd.Flags().BoolVarP(&skipMigration, "skip-migration", "s", false, "Skip migration")
 	err := rootCmd.Execute()
 	if err != nil {
 		// Required arguments are missing, etc
