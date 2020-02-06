@@ -21,5 +21,7 @@ jobs:
         fetch-depth: 1
     - name: Build
       run: ./build.sh
-    - name: Test
+    - name: Test @ PostgreSQL
       run: go test -count=1 -v ./...
+    - name: Test @ CockroachDB
+      run: USE_COCKROACH_DB=true go test -count=1 -v ./...
