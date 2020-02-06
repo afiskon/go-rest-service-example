@@ -46,7 +46,11 @@ func migrateDatabase(conn *pgx.Conn) {
 		log.Fatalf("Unable to load migrations: %v", err)
 	}
 
-	err = migrator.Migrate()
+	err = migrator.Migrate(func(err error) (retry bool) {
+		log.Infof("Commit failed during migration, retrying. Error: %v", err)
+		return true
+	})
+
 	if err != nil {
 		log.Fatalf("Unable to migrate: %v", err)
 	}
