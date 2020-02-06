@@ -1,7 +1,7 @@
 package migrate
 
 // Fork of https://github.com/jackc/tern
-// Ported to pgx/v4 by @afiskon 2019-2020
+// Ported to pgx/v4 and made compatible with CockroachDB by @afiskon 2019-2020
 
 import (
 	"bytes"
@@ -309,10 +309,6 @@ func (m *Migrator) MigrateTo(targetVersion int32, onCommitFailed func(err error)
 			if err != nil {
 				return errors.Wrap(err, "Unable to execute migration query")
 			}
-
-			// Doesn't work with CockroachDB
-			// Reset all database connection settings. Important to do before updating version as search_path may have been changed.
-			// m.conn.Exec(context.Background(), "reset all")
 
 			// Add one to the version
 			_, err = m.conn.Exec(context.Background(), "update "+m.versionTable+" set version=$1", sequence)
