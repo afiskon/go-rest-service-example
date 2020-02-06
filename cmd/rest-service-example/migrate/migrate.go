@@ -310,8 +310,9 @@ func (m *Migrator) MigrateTo(targetVersion int32, onCommitFailed func(err error)
 				return errors.Wrap(err, "Unable to execute migration query")
 			}
 
+			// Doesn't work with CockroachDB
 			// Reset all database connection settings. Important to do before updating version as search_path may have been changed.
-			m.conn.Exec(context.Background(), "reset all")
+			// m.conn.Exec(context.Background(), "reset all")
 
 			// Add one to the version
 			_, err = m.conn.Exec(context.Background(), "update "+m.versionTable+" set version=$1", sequence)
