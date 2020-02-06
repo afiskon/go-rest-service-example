@@ -3,7 +3,7 @@ on: [push]
 # on:
 #  pull_request:
 env:
-  GO_VERSION: 1.12.15
+  GO_VERSION: 1.13.7
 jobs:
   test:
     name: Run Tests
